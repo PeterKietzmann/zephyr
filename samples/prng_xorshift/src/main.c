@@ -5,7 +5,35 @@
  */
 
 #include <zephyr.h>
+#include <device.h>
+#include <devicetree.h>
+#include <drivers/gpio.h>
 #include "stdio.h"
+#include <drivers/pinmux.h>
+#include <fsl_port.h>
+
+#define GPIO_PORT DT_LABEL(DT_NODELABEL(gpiob))
+#define GPIO_PORT_MUX DT_LABEL(DT_NODELABEL(portb))
+#define GPIO_PIN 29
+
+struct device *dev;
+
+static inline void init_gpio(void)
+{
+	pinmux_pin_set(device_get_binding(GPIO_PORT_MUX), GPIO_PIN, PORT_PCR_MUX(kPORT_MuxAsGpio));
+	dev = device_get_binding(GPIO_PORT);
+
+	if (dev == NULL) {
+		printf("device_get_binding FAILED\n");
+		return;
+	}
+
+	int ret = gpio_pin_configure(dev, GPIO_PIN, GPIO_OUTPUT);
+	if (ret < 0) {
+		printf("gpio_pin_configure FAILED\n");
+		return;
+	}
+}
 
 static uint32_t _state32 = 534571505;
 
@@ -29,9 +57,17 @@ uint32_t random_uint32(void)
 void main(void)
 {
 	printf("prng_xorshift\n");
+
 	int i=0;
+	bool led_is_on = true;
+
+	init_gpio();
+	
 	while(i<10) {
-		printf("0x%x\n", random_uint32());
+		gpio_pin_set(dev, GPIO_PIN, (int)led_is_on);	
+		led_is_on = !led_is_on;
+		// printf("0x%x\n", random_uint32());
+		random_uint32();
 		i++;
 	}
 }

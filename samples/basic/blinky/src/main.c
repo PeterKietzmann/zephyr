@@ -41,7 +41,7 @@ void main(void)
 		return;
 	}
 
-	ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
+	ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE);
 	if (ret < 0) {
 		return;
 	}
