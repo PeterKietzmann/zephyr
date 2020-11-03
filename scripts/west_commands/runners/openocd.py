@@ -181,17 +181,31 @@ class OpenOcdBinaryRunner(ZephyrBinaryRunner):
             ep_addr = f"0x{ELFFile(f).header['e_entry']:016x}"
 
         pre_init_cmd = []
+        pre_load_cmd = []
+        post_verify_cmd = []
         for i in self.pre_init:
             pre_init_cmd.append("-c")
             pre_init_cmd.append(i)
 
+        for i in self.pre_load:
+            pre_load_cmd.append("-c")
+            pre_load_cmd.append(i)
+
+        for i in self.post_verify:
+            post_verify_cmd.append("-c")
+            post_verify_cmd.append(i)
+
         cmd = (self.openocd_cmd + self.serial + self.cfg_cmd +
                       pre_init_cmd + ['-c', 'init',
-                                       '-c', 'targets',
-                                       '-c', 'reset halt',
-                                       '-c', 'load_image ' + self.elf_name,
+                                       '-c', 'targets'] +
+                      pre_load_cmd + ['-c', 'reset halt',
+                                       '-c', self.load_cmd + ' ' + self.elf_name,
                                        '-c', 'resume ' + ep_addr,
-                                       '-c', 'shutdown'])
+                                       '-c', 'reset halt' ] +
+                      post_verify_cmd +
+                      ['-c', 'reset run',
+                        '-c', 'shutdown'])
+        print(cmd) 
         self.check_call(cmd)
 
     def do_debug(self, **kwargs):

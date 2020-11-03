@@ -1,0 +1,1 @@
+/home/vm-64bit/zephyrproject/zephyr/share/zephyr-package/cmake

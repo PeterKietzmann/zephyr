@@ -67,3 +67,6 @@ unset zephyr_answer_file
 zephyr_answer_file=~/.zephyrrc
 [ -f ${zephyr_answer_file} ] &&  . ${zephyr_answer_file}
 unset zephyr_answer_file
+
+export ZEPHYR_TOOLCHAIN_VARIANT=cross-compile
+export CROSS_COMPILE=~/riscv32-unknown-elf-gcc/bin/riscv32-unknown-elf-

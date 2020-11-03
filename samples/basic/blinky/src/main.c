@@ -26,10 +26,13 @@
 #define PIN	0
 #define FLAGS	0
 #endif
-
+// #include <sys/printk.h>
+#include "stdio.h"
 void main(void)
 {
-	const struct device *dev;
+    printf("\nHello this is PETER\n");
+	puts("MIAU");
+	struct device *dev;
 	bool led_is_on = true;
 	int ret;
 
