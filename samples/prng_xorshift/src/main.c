@@ -1,14 +1,13 @@
 /*
- * Copyright (c) 2012-2014 Wind River Systems, Inc.
+ * Copyright (c) 2020 HAW Hamburg
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <stdio.h>
 #include <zephyr.h>
 #include <device.h>
-#include <devicetree.h>
 #include <drivers/gpio.h>
-#include "stdio.h"
 #include <drivers/pinmux.h>
 #include <fsl_port.h>
 
@@ -16,7 +15,14 @@
 #define GPIO_PORT_MUX DT_LABEL(DT_NODELABEL(portb))
 #define GPIO_PIN 29
 
+#define EXP_DURATION 10 // seconds
+
 struct device *dev;
+unsigned running;
+unsigned rand_integers=0;
+
+void my_timer_handler(struct k_timer *);
+K_TIMER_DEFINE(my_timer, my_timer_handler, NULL);
 
 static inline void init_gpio(void)
 {
@@ -34,6 +40,7 @@ static inline void init_gpio(void)
 		return;
 	}
 }
+
 
 static uint32_t _state32 = 534571505;
 
@@ -54,21 +61,34 @@ uint32_t random_uint32(void)
     return xorshift32(&_state32);
 }
 
+
+
+
+void my_timer_handler(struct k_timer *dummy)
+{
+	running = 0;
+	k_timer_stop(&my_timer);
+	printf("rand_integers: %i in %i seconds\n", rand_integers, EXP_DURATION);
+	rand_integers=0;
+}
+
 void main(void)
 {
 	printf("prng_xorshift\n");
 
-	int i=0;
 	bool led_is_on = true;
 
 	init_gpio();
 	
-	while(i<10) {
-		gpio_pin_set(dev, GPIO_PIN, (int)led_is_on);	
-		led_is_on = !led_is_on;
+	rand_integers = 0;
+	running = 1;
+	k_timer_start(&my_timer, K_SECONDS(EXP_DURATION), K_SECONDS(1));
+	while(running) {
+		// gpio_pin_set(dev, GPIO_PIN, (int)led_is_on);	
+		// led_is_on = !led_is_on;
 		// printf("0x%x\n", random_uint32());
 		random_uint32();
-		i++;
+		rand_integers++;
 	}
 }
 	
