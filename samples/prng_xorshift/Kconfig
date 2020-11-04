@@ -1,0 +1,29 @@
+# Private config options for can sample app
+
+# Copyright (c) 2020 Peter Kietzmann
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "PRNG measurement application"
+
+choice
+	prompt "PRNG choice"
+	default XORSHIFT
+
+config XORSHIFT
+	bool "xorshift 32 generator"
+
+config MINSTD
+	bool "minimal standard"
+
+config MUSLLCG
+	bool "knuth LCG"
+
+config TINYMT32
+	bool "tiny mersenne twister"
+
+config MERSENNE
+	bool "mersenne twister"
+
+endchoice
+
+source "Kconfig.zephyr"

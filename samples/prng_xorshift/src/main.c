@@ -11,11 +11,27 @@
 #include <drivers/pinmux.h>
 #include <fsl_port.h>
 
+#if CONFIG_XORSHIFT
+#include "xorshift.c"
+#elif CONFIG_MINSTD
+#include "minstd.c"
+#elif CONFIG_MUSLLCG
+#include "musllcg.c" 
+#elif CONFIG_TINYMT32
+#include "tinymt32.c"
+#elif CONFIG_MERSENNE
+#include "mersenne.c" 
+#endif
+
 #define GPIO_PORT DT_LABEL(DT_NODELABEL(gpiob))
 #define GPIO_PORT_MUX DT_LABEL(DT_NODELABEL(portb))
 #define GPIO_PIN 29
 
 #define EXP_DURATION 10 // seconds
+
+#define NUM_MEAS 100
+
+uint32_t seed = 534571505;
 
 struct device *dev;
 unsigned running;
@@ -41,54 +57,40 @@ static inline void init_gpio(void)
 	}
 }
 
-
-static uint32_t _state32 = 534571505;
-
-uint32_t xorshift32(uint32_t *state)
-{
-    uint32_t x = *state;
-
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    *state = x;
-
-    return x;
-}
-
-uint32_t random_uint32(void)
-{
-    return xorshift32(&_state32);
-}
-
-
-
-
 void my_timer_handler(struct k_timer *dummy)
 {
 	running = 0;
-	k_timer_stop(&my_timer);
-	printf("rand_integers: %i in %i seconds\n", rand_integers, EXP_DURATION);
-	rand_integers=0;
+	// k_timer_stop(&my_timer);
+	// printf("rand_integers: %i in %i seconds\n", rand_integers, EXP_DURATION);
+	// rand_integers=0;
+	// if(num_meas < NUM_MEAS) {
+	// 	k_timer_start(&my_timer, K_SECONDS(EXP_DURATION), K_SECONDS(1));
+	// }
 }
 
 void main(void)
 {
-	printf("prng_xorshift\n");
+	printf("RNG\n");
+	random_init(seed);
 
-	bool led_is_on = true;
-
+	// bool led_is_on = true;
 	init_gpio();
 	
-	rand_integers = 0;
-	running = 1;
-	k_timer_start(&my_timer, K_SECONDS(EXP_DURATION), K_SECONDS(1));
-	while(running) {
-		// gpio_pin_set(dev, GPIO_PIN, (int)led_is_on);	
-		// led_is_on = !led_is_on;
-		// printf("0x%x\n", random_uint32());
-		random_uint32();
-		rand_integers++;
+	printf("EXP_DURATION [s]: %i\n", EXP_DURATION);
+	for (int i = 0; i < NUM_MEAS; i++)
+	{
+		rand_integers = 0;
+		running = 1;
+		k_timer_start(&my_timer, K_SECONDS(EXP_DURATION), K_SECONDS(1));
+		while(running) {
+			// gpio_pin_set(dev, GPIO_PIN, (int)led_is_on);	
+			// led_is_on = !led_is_on;
+			// printf("0x%x\n", random_uint32());
+			random_uint32();
+			rand_integers++;
+		}
+		k_timer_stop(&my_timer);
+		printf("%3i/%i: rand_integers: %i\n", i, NUM_MEAS, rand_integers);
 	}
 }
 	
