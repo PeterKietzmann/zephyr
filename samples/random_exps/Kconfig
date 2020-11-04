@@ -24,6 +24,10 @@ config TINYMT32
 config MERSENNE
 	bool "mersenne twister"
 
+config TRNG
+	bool "hardware TRNG"
+	select ENTROPY_GENERATOR
+
 endchoice
 
 source "Kconfig.zephyr"

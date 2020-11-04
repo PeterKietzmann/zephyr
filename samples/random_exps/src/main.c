@@ -21,6 +21,8 @@
 #include "tinymt32.c"
 #elif CONFIG_MERSENNE
 #include "mersenne.c" 
+#elif CONFIG_TRNG
+#include "trng.c"
 #endif
 
 #define GPIO_PORT DT_LABEL(DT_NODELABEL(gpiob))
@@ -29,7 +31,7 @@
 
 #define EXP_DURATION 10 // seconds
 
-#define NUM_MEAS 100
+#define NUM_MEAS 50
 
 uint32_t seed = 534571505;
 
