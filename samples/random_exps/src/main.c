@@ -24,6 +24,8 @@
 #include "tinymt32.c"
 #elif CONFIG_MERSENNE
 #include "mersenne.c" 
+#elif CONFIG_SHA256PRNG
+#include "sha256prng.c" 
 #elif CONFIG_TRNG
 #include "trng.c"
 #endif

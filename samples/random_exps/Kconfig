@@ -24,6 +24,9 @@ config TINYMT32
 config MERSENNE
 	bool "mersenne twister"
 
+config SHA256PRNG
+	bool "sha256 prng"
+
 config TRNG
 	bool "hardware TRNG"
 	select ENTROPY_GENERATOR
