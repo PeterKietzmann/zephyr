@@ -8,8 +8,11 @@
 #include <zephyr.h>
 #include <device.h>
 #include <drivers/gpio.h>
+
+#ifndef CONFIG_BOARD_HIFIVE1_REVB // ugly, should rather be ifdef openvega but i don't kno the define name atm
 #include <drivers/pinmux.h>
 #include <fsl_port.h>
+#endif
 
 #if CONFIG_XORSHIFT
 #include "xorshift.c"
@@ -44,6 +47,7 @@ K_TIMER_DEFINE(my_timer, my_timer_handler, NULL);
 
 static inline void init_gpio(void)
 {
+#ifndef CONFIG_BOARD_HIFIVE1_REVB
 	pinmux_pin_set(device_get_binding(GPIO_PORT_MUX), GPIO_PIN, PORT_PCR_MUX(kPORT_MuxAsGpio));
 	dev = device_get_binding(GPIO_PORT);
 
@@ -57,6 +61,7 @@ static inline void init_gpio(void)
 		printf("gpio_pin_configure FAILED\n");
 		return;
 	}
+#endif
 }
 
 void my_timer_handler(struct k_timer *dummy)
